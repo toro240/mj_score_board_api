@@ -14,7 +14,13 @@ logger = getLogger(__name__)
 def auth(request):
     if request.method == 'GET':
         return JsonResponse({})
-
+    ret = {
+        "status":500,
+        "data": {
+            "message": "",
+            "aws_result": {}
+        },
+    }
     try:
         aws_client = boto3.client('cognito-idp',
             region_name = "ap-northeast-1",
@@ -31,14 +37,10 @@ def auth(request):
                 "PASSWORD": request.POST["password"],
             }
         )
-        return JsonResponse(aws_result)
+        ret["status"] = aws_result["ResponseMetadata"]["HTTPStatusCode"]
+        ret["data"]["aws_result"] = aws_result
+        return JsonResponse(ret)
     except ClientError as ce:
-        ret = {
-            "status":500,
-            "data": {
-                "message": "",
-            },
-        }
         if ce.response['Error']['Code'] == 'NotAuthorizedException':
             ret["status"] = 401
             ret["data"]["message"] = "ユーザー名・パスワードが間違っています。"
@@ -49,8 +51,6 @@ def auth(request):
         return JsonResponse(ret)
     except Exception as e:
         logger.error(e)
-        ret = {
-            "status":500,
-            "data":"システムエラーが発生しました。",
-        }
+        ret["status"] = 500
+        ret["data"]["message"] = "システムエラーが発生しました。"
         return JsonResponse(ret)
