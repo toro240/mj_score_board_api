@@ -167,7 +167,7 @@ LOGGING = {
         },
         'console':{
 
-            'level':'INFO',
+            'level':'DEBUG',
             'class':'logging.StreamHandler',
             'formatter':'standard'
         },
@@ -189,6 +189,10 @@ LOGGING = {
             'level':'DEBUG',
             'propagate':True,
 
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
         },
     },
 }
